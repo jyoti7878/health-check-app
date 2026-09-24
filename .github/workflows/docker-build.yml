@@ -24,3 +24,15 @@ jobs:
 
       - name: Push Docker image
         run: docker push jyoti7878/health-check-app:latest
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo docker pull jyoti7878/health-check-app:latest
+            sudo docker stop $(sudo docker ps -q) || true
+            sudo docker rm $(sudo docker ps -aq) || true
+            sudo docker run -d -p 3000:3000 jyoti7878/health-check-app:latest
